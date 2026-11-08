@@ -3,12 +3,11 @@
 from contextlib import asynccontextmanager
 from time import perf_counter
 
-import pandas as pd
 from fastapi import FastAPI, HTTPException
 
 from api.model_loader import ModelLoader
 from api.monitoring_logger import log_inference
-from api.preprocessing import to_feature_frame
+from api.preprocessing import to_feature_rows
 from api.schemas import CropInput, CropPrediction, BatchPredictionRequest, BatchPredictionResponse
 
 model_loader = ModelLoader()
@@ -51,22 +50,26 @@ def metadata() -> dict[str, object]:
     }
 
 
-def _predict(frame: pd.DataFrame) -> list[CropPrediction]:
-    if not model_loader.is_ready():
+def _predict(records: list[dict[str, float]]) -> list[CropPrediction]:
+    model = model_loader.model
+    if model is None:
         raise HTTPException(status_code=503, detail="Crop model is not available.")
     started = perf_counter()
-    features = to_feature_frame(frame)
-    probabilities = model_loader.model.predict_proba(features)
-    predictions = model_loader.model.classes_[probabilities.argmax(axis=1)]
+    features = to_feature_rows(records)
+    probabilities = model.predict_proba(features)
+    predictions = [
+        model.classes_[row_probabilities.index(max(row_probabilities))]
+        for row_probabilities in probabilities
+    ]
     elapsed_ms = round((perf_counter() - started) * 1000, 3)
     results = []
     for prediction, row_probabilities in zip(predictions, probabilities):
         result = CropPrediction(
             recommended_crop=str(prediction),
-            confidence=float(row_probabilities.max()),
+            confidence=float(max(row_probabilities)),
             probabilities={
                 str(label): float(probability)
-                for label, probability in zip(model_loader.model.classes_, row_probabilities)
+                for label, probability in zip(model.classes_, row_probabilities)
             },
         )
         log_inference(
@@ -82,10 +85,10 @@ def _predict(frame: pd.DataFrame) -> list[CropPrediction]:
 
 @app.post("/predict", response_model=CropPrediction)
 def predict(data: CropInput) -> CropPrediction:
-    return _predict(pd.DataFrame([data.model_dump()]))[0]
+    return _predict([data.model_dump()])[0]
 
 
 @app.post("/predict/batch", response_model=BatchPredictionResponse)
 def predict_batch(data: BatchPredictionRequest) -> BatchPredictionResponse:
-    predictions = _predict(pd.DataFrame([item.model_dump() for item in data.items]))
+    predictions = _predict([item.model_dump() for item in data.items])
     return BatchPredictionResponse(count=len(predictions), predictions=predictions)

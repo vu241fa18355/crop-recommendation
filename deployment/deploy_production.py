@@ -31,7 +31,7 @@ def main() -> int:
     parser.add_argument("--build-only", action="store_true", help="Build the Docker image without deploying.")
     args = parser.parse_args()
 
-    model_path = ROOT / "deployment" / "model.pkl"
+    model_path = ROOT / "deployment" / "model.json"
     metadata_path = ROOT / "deployment" / "model_metadata.json"
     if not model_path.is_file() or not metadata_path.is_file():
         raise FileNotFoundError("Run `python src/train.py` before deployment.")

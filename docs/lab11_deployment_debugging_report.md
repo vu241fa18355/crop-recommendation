@@ -2,7 +2,7 @@
 
 ## Model bundle missing
 
-Run `python .\src\crop_workflow.py train` and confirm `deployment/model.pkl` and `deployment/model_metadata.json` exist.
+Run `python .\src\crop_workflow.py train` and confirm `deployment/model.json` and `deployment/model_metadata.json` exist.
 
 ## Docker cannot connect
 

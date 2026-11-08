@@ -1,8 +1,4 @@
-# API + crop model runtime. Match scikit-learn to the bundled model.
-numpy==2.4.6
-pandas==2.3.3
-scikit-learn==1.9.0
-joblib==1.5.3
+# API + portable JSON model runtime.
 fastapi==0.141.1
-uvicorn[standard]==0.52.4
+uvicorn==0.52.4
 pydantic==2.13.4

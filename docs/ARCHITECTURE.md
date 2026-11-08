@@ -4,7 +4,7 @@ The repository has a single configured crop dataset and a canonical workflow in 
 
 ```text
 CSV -> schema checks -> stratified split -> RandomForestClassifier
-    -> evaluation + macro-F1 gate -> deployment/model.pkl
+    -> evaluation + macro-F1 gate -> deployment/model.json
     -> FastAPI -> Docker image -> Kubernetes Deployment/Service
 ```
 

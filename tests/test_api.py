@@ -1,7 +1,12 @@
+from pathlib import Path
+
+import joblib
+import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import app, model_loader
+from api.model_loader import FEATURE_COLUMNS
 
 VALID_SOIL = {
     "N": 90,
@@ -38,6 +43,17 @@ def test_predict_returns_a_crop_and_probabilities(client):
     assert 0 <= body["confidence"] <= 1
     assert len(body["probabilities"]) == 22
     assert sum(body["probabilities"].values()) == pytest.approx(1.0)
+
+
+def test_portable_model_matches_training_model(client):
+    root = Path(__file__).resolve().parents[1]
+    training_model = joblib.load(root / "models" / "crop_random_forest.pkl")
+    frame = pd.DataFrame([VALID_SOIL], columns=FEATURE_COLUMNS)
+    expected = training_model.predict_proba(frame)[0]
+    assert model_loader.model is not None
+    actual = model_loader.model.predict_proba([frame.iloc[0].tolist()])[0]
+    for actual_value, expected_value in zip(actual, expected):
+        assert actual_value == pytest.approx(expected_value, abs=1e-12)
 
 
 def test_batch_prediction(client):

@@ -1,17 +1,22 @@
-"""Validate and order features consistently for model inference."""
+"""Validate and order API measurements for crop model inference."""
 
-import numpy as np
-import pandas as pd
+import math
+from collections.abc import Mapping, Sequence
 
 from api.model_loader import FEATURE_COLUMNS
 
 
-def to_feature_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    missing = [column for column in FEATURE_COLUMNS if column not in frame.columns]
-    extra = [column for column in frame.columns if column not in FEATURE_COLUMNS]
-    if missing or extra:
-        raise ValueError(f"Invalid crop features; missing={missing}, extra={extra}.")
-    ordered = frame.loc[:, FEATURE_COLUMNS].astype(float)
-    if not np.isfinite(ordered.to_numpy()).all():
-        raise ValueError("Crop features must contain only finite numbers.")
-    return ordered
+def to_feature_rows(records: Sequence[Mapping[str, float]]) -> list[list[float]]:
+    rows = []
+    for index, record in enumerate(records):
+        missing = [column for column in FEATURE_COLUMNS if column not in record]
+        extra = [column for column in record if column not in FEATURE_COLUMNS]
+        if missing or extra:
+            raise ValueError(f"Invalid crop features at row {index}; missing={missing}, extra={extra}.")
+        row = [float(record[column]) for column in FEATURE_COLUMNS]
+        if not all(math.isfinite(value) for value in row):
+            raise ValueError(f"Crop features at row {index} must be finite numbers.")
+        rows.append(row)
+    if not rows:
+        raise ValueError("At least one crop feature record is required.")
+    return rows

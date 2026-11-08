@@ -10,7 +10,7 @@ COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 
 COPY api/ ./api/
-COPY deployment/ ./deployment/
+COPY deployment/model.json deployment/model_metadata.json ./deployment/
 
 EXPOSE 8000
 

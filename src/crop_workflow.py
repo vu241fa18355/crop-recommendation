@@ -128,14 +128,39 @@ def train() -> dict[str, Any]:
     model.fit(x_train, y_train)
     deployment = ROOT / "deployment"
     deployment.mkdir(parents=True, exist_ok=True)
-    model_path = deployment / "model.pkl"
-    joblib.dump(model, model_path)
+    (ROOT / "models").mkdir(parents=True, exist_ok=True)
     joblib.dump(model, ROOT / "models" / "crop_random_forest.pkl")
+    portable_model = {"classes": [str(value) for value in model.classes_], "trees": []}
+    for estimator in model.estimators_:
+        tree = estimator.tree_
+        leaf_values = []
+        for node in range(tree.node_count):
+            if tree.children_left[node] == -1:
+                leaf_values.append(
+                    [
+                        [int(class_index), float(value)]
+                        for class_index, value in enumerate(tree.value[node, 0, :])
+                        if value > 0
+                    ]
+                )
+            else:
+                leaf_values.append(None)
+        portable_model["trees"].append(
+            {
+                "left": tree.children_left.astype(int).tolist(),
+                "right": tree.children_right.astype(int).tolist(),
+                "feature": tree.feature.astype(int).tolist(),
+                "threshold": tree.threshold.astype(float).tolist(),
+                "leaf_values": leaf_values,
+            }
+        )
+    write_json(deployment / "model.json", portable_model)
     metadata = {
         "service": "Crop Recommendation API",
         "model_name": "crop_random_forest",
         "model_version": "1.0.0",
         "model_type": "RandomForestClassifier",
+        "model_format": "portable-tree-json-v2",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "dataset": config["data"]["raw_path"],
         "features": features,
@@ -151,7 +176,7 @@ def train() -> dict[str, Any]:
 
 
 def load_model() -> tuple[Any, dict[str, Any]]:
-    model_path = ROOT / "deployment" / "model.pkl"
+    model_path = ROOT / "models" / "crop_random_forest.pkl"
     metadata_path = ROOT / "deployment" / "model_metadata.json"
     if not model_path.is_file() or not metadata_path.is_file():
         raise FileNotFoundError("Run `python src/train.py` before using the trained model.")

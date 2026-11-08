@@ -49,7 +49,7 @@ The NodePort service is available at `http://localhost:30080` on Docker Desktop.
 
 ## 5. Output locations
 
-- `deployment/model.pkl` and `deployment/model_metadata.json`: serving model bundle.
+- `deployment/model.json` and `deployment/model_metadata.json`: portable serving model bundle.
 - `data/processed/`: crop train/test arrays and metadata.
 - `reports/`: model metrics, quality-gate decision, sample prediction, and monitoring summary.
 - `artifacts/`: data and preprocessing validation reports.

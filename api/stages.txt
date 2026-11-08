@@ -1,7 +1,7 @@
 Crop recommendation API request stages
 1. Validate the seven numeric soil and climate values with Pydantic.
 2. Arrange inputs in the training feature order: N, P, K, temperature, humidity, ph, rainfall.
-3. Load deployment/model.pkl and verify its metadata.
+3. Load deployment/model.json and verify its metadata.
 4. Predict the recommended crop and per-class probability.
 5. Return the crop, confidence, and probability map.
 6. Append inference metadata to logs/crop_inference.jsonl.
