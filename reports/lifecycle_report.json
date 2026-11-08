@@ -1,0 +1,6 @@
+{
+  "status": "promoted",
+  "model_name": "crop_random_forest",
+  "model_version": "1.0.0",
+  "macro_f1": 0.9931775541531639
+}

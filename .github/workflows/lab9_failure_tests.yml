@@ -1,0 +1,23 @@
+name: Crop Data Validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "data/raw/crop_recommendation.csv"
+      - "src/**"
+      - "tests/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: python src/mlops_pipeline/02_validate_data.py
+      - run: python src/mlops_pipeline/10_failure_injection.py
+      - run: python -m pytest tests -q

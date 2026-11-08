@@ -1,0 +1,3 @@
+Crop inference lifecycle
+Input JSON -> Pydantic validation -> feature ordering -> crop model
+-> recommended crop and confidence -> API response -> local inference log

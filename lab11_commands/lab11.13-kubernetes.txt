@@ -1,0 +1,16 @@
+Crop Recommendation Kubernetes deployment
+
+Prerequisites:
+- Docker Desktop is running with Kubernetes enabled.
+- The crop image is built locally: docker build -t crop-recommendation-api:1.0 .
+- kubectl config current-context returns the Docker Desktop context.
+
+Commands:
+  kubectl apply -f .\k8s\deployment.yaml
+  kubectl apply -f .\k8s\service.yaml
+  kubectl rollout status deployment/crop-recommendation-api
+  kubectl get deployment,pods,service
+
+Test:
+  Invoke-RestMethod http://localhost:30080/health
+  Invoke-RestMethod http://localhost:30080/metadata

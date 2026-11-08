@@ -1,0 +1,22 @@
+Crop Recommendation Docker and Kubernetes reference
+
+Train and test:
+  python .\src\crop_workflow.py all
+  python -m pytest .\tests -q
+
+Docker:
+  docker build -t crop-recommendation-api:1.0 .
+  docker run --rm -p 8000:8000 crop-recommendation-api:1.0
+  Invoke-RestMethod http://localhost:8000/health
+
+Kubernetes (Docker Desktop):
+  Enable Kubernetes in Docker Desktop.
+  kubectl config current-context
+  kubectl apply -f .\k8s\deployment.yaml
+  kubectl apply -f .\k8s\service.yaml
+  kubectl rollout status deployment/crop-recommendation-api
+  kubectl get pods,service
+
+The service is available at http://localhost:30080.
+Use python .\deployment\deploy_production.py --check to validate the model bundle
+and manifest files before deploying.

@@ -1,0 +1,19 @@
+Crop Recommendation project
+|
+|-- data
+|   |-- raw/crop_recommendation.csv       Source dataset
+|   |-- processed/                       Generated training and test data
+|-- src
+|   |-- crop_workflow.py                 Canonical crop ML workflow
+|   |-- mlops_pipeline/                  Compatible stage entry points
+|-- api                                  FastAPI application and validation
+|-- deployment                           Trained model bundle and deploy helper
+|-- k8s                                  Kubernetes Deployment and Service
+|-- tests                                API and request-validation tests
+|-- pipelines                            Legacy lab entry points for crop stages
+|-- artifacts, reports, logs             Crop-only generated outputs
+|-- docs                                 Project and operations documentation
+|-- config.yaml                          Dataset, model, and quality settings
+|-- Dockerfile                           API image
+|-- requirements*.txt                    Python dependencies
+|-- README.md                            Setup and run instructions

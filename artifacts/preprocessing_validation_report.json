@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "arrays": {
+    "X_train_final.npy": [
+      1760,
+      7
+    ],
+    "X_test_final.npy": [
+      440,
+      7
+    ],
+    "y_train.npy": [
+      1760
+    ],
+    "y_test.npy": [
+      440
+    ]
+  }
+}

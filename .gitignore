@@ -1,0 +1,27 @@
+# Environments
+venv/
+.venv/
+env/
+__pycache__/
+.ipynb_checkpoints/
+
+# Keep the crop training dataset in source control; ignore generated data.
+data/processed/*.npy
+data/processed/*.csv
+data/processed/*.json
+data/monitoring/
+
+# Generated training model. The deployment bundle is intentionally tracked.
+models/*.pkl
+
+logs/
+outputs/
+
+.vscode/
+
+# Ignore local experiment and test output.
+mlruns/
+mlflow.db
+
+.pytest_cache/
+*.pyc

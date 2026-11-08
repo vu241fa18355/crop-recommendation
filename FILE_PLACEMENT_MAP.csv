@@ -1,0 +1,13 @@
+RelativePath,Description
+data/raw/crop_recommendation.csv,Source crop recommendation dataset
+config.yaml,Dataset paths and model workflow configuration
+src/crop_workflow.py,Canonical crop recommendation workflow
+api/main.py,FastAPI application
+api/schemas.py,Validated crop request and response models
+api/model_loader.py,Loads the trained crop model bundle
+deployment/model.pkl,Trained crop prediction model
+deployment/model_metadata.json,Model schema and evaluation metadata
+k8s/deployment.yaml,Kubernetes API deployment
+k8s/service.yaml,Kubernetes API service
+tests/test_api.py,API and request validation tests
+README.md,Setup and execution guide
