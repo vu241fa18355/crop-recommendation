@@ -13,11 +13,25 @@ data/monitoring/
 
 # Generated training model. The deployment bundle is intentionally tracked.
 models/*.pkl
+models/candidate_*
+models/registry.json
+models/registry/
 
 logs/
 outputs/
 
 .vscode/
+
+# Monitoring and experiment reports contain local request/run state.
+reports/concept_drift_report.json
+reports/data_drift_report.json
+reports/drift_analysis_report.json
+reports/experiment_tracking_report.json
+reports/monitor_trigger_report.json
+reports/performance_monitoring_report.json
+reports/prediction_drift_report.json
+reports/request_history_report.json
+reports/retraining_report.json
 
 # Ignore local experiment and test output.
 mlruns/

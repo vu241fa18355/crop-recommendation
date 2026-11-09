@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "model_artifact": "deployment\\model.json",
+  "model_metadata": "deployment\\model_metadata.json",
+  "manifests": {
+    "deployment.yaml": {
+      "kind": "Deployment",
+      "name": "crop-recommendation-api"
+    },
+    "service.yaml": {
+      "kind": "Service",
+      "name": "crop-recommendation-api"
+    }
+  }
+}

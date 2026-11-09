@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "cases": {
+    "missing_feature": {
+      "rejected": true,
+      "error": "Dataset is missing required columns: N"
+    },
+    "missing_value": {
+      "rejected": true,
+      "error": "Crop dataset contains missing feature or target values."
+    },
+    "non_numeric_feature": {
+      "rejected": true,
+      "error": "All crop input features must be numeric."
+    },
+    "single_class": {
+      "rejected": true,
+      "error": "Crop dataset must contain at least two crop labels."
+    },
+    "empty_label": {
+      "rejected": true,
+      "error": "Crop dataset must contain at least two crop labels."
+    }
+  }
+}

@@ -1,4 +1,4 @@
-name: Crop Data Validation
+name: Lab 9 - Crop Failure Injection and Recovery
 
 on:
   workflow_dispatch:
@@ -22,3 +22,11 @@ jobs:
       - run: python src/mlops_pipeline/02_validate_data.py
       - run: python src/mlops_pipeline/10_failure_injection.py
       - run: python -m pytest tests -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: crop-lab9-${{ github.run_number }}
+          path: |
+            reports/failure_injection_report.json
+            artifacts/data_validation_report.json
+          if-no-files-found: ignore

@@ -24,3 +24,8 @@ model:
 
 quality_gate:
   minimum_macro_f1: 0.90
+
+monitoring:
+  standardized_mean_threshold: 0.75
+  prediction_drift_threshold: 0.25
+  feedback_file: data/monitoring/labeled_feedback.csv

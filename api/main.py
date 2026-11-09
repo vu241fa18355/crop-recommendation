@@ -73,6 +73,7 @@ def _predict(records: list[dict[str, float]]) -> list[CropPrediction]:
             },
         )
         log_inference(
+            features=records[len(results)],
             prediction=result.recommended_crop,
             confidence=result.confidence,
             latency_ms=elapsed_ms,

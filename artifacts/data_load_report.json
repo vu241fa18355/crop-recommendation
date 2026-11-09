@@ -1,0 +1,16 @@
+{
+  "status": "loaded",
+  "dataset": "data\\raw\\crop_recommendation.csv",
+  "sha256": "54a5a6e5408668e668667efc50de2fc867c1b875e0431b4f54dd331b0a109a4e",
+  "rows": 2200,
+  "feature_columns": [
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+  ],
+  "target_column": "label"
+}

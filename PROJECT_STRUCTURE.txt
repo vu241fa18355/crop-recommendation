@@ -11,8 +11,9 @@ Crop Recommendation project
 |-- k8s                                  Kubernetes Deployment and Service
 |-- tests                                API and request-validation tests
 |-- pipelines                            Legacy lab entry points for crop stages
+|-- .github/workflows                    Hosted CI and self-hosted Lab 13 release
 |-- artifacts, reports, logs             Crop-only generated outputs
-|-- docs                                 Project and operations documentation
+|-- docs                                 Lab guides 1-13 and operations documentation
 |-- config.yaml                          Dataset, model, and quality settings
 |-- Dockerfile                           API image
 |-- requirements*.txt                    Python dependencies

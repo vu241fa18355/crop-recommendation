@@ -1,0 +1,144 @@
+name: Lab 13 - Self-hosted Crop MLOps End-to-End
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_image:
+        description: Push the tested image to Docker Hub (requires repository secrets)
+        required: true
+        type: boolean
+        default: false
+      deploy_to_kubernetes:
+        description: Deploy to the runner's configured Kubernetes cluster
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crop-self-hosted-end-to-end
+  cancel-in-progress: false
+
+jobs:
+  end-to-end:
+    runs-on: [self-hosted, Windows, X64]
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      IMAGE_NAME: crop-recommendation-api
+      IMAGE_TAG: ${{ github.sha }}
+      CONTAINER_NAME: crop-api-${{ github.run_id }}
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run Labs 1-12 crop lifecycle
+        run: python src/crop_workflow.py all
+
+      - name: Verify model bundle
+        run: python check_project.py
+
+      - name: Run API and monitoring tests
+        run: python -m pytest tests -q
+
+      - name: Build container
+        run: docker build --tag "${env:IMAGE_NAME}:${env:IMAGE_TAG}" .
+
+      - name: Smoke-test container
+        run: |
+          $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
+          $listener.Start()
+          $port = $listener.LocalEndpoint.Port
+          $listener.Stop()
+          "CROP_API_PORT=$port" | Out-File -FilePath $env:GITHUB_ENV -Append
+          docker run --detach --rm --name $env:CONTAINER_NAME --publish "127.0.0.1:${port}:8000" "$env:IMAGE_NAME`:$env:IMAGE_TAG"
+          $baseUrl = "http://127.0.0.1:$port"
+          $ready = $false
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            try {
+              $health = Invoke-RestMethod -Uri "$baseUrl/health" -TimeoutSec 3
+              if ($health.status -eq "healthy") { $ready = $true; break }
+            } catch {
+              Start-Sleep -Seconds 2
+            }
+          }
+          if (-not $ready) {
+            docker logs $env:CONTAINER_NAME
+            throw "Crop API container did not become healthy."
+          }
+          $body = @{
+            N = 90; P = 42; K = 43
+            temperature = 20.88; humidity = 82.0; ph = 6.5; rainfall = 202.94
+          } | ConvertTo-Json
+          $prediction = Invoke-RestMethod -Uri "$baseUrl/predict" -Method Post -ContentType "application/json" -Body $body
+          if (-not $prediction.recommended_crop) { throw "Container prediction smoke test failed." }
+          Write-Host "Container health and crop prediction passed: $($prediction.recommended_crop)"
+
+      - name: Push image to Docker Hub
+        if: ${{ inputs.publish_image }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if (-not $env:DOCKERHUB_USERNAME -or -not $env:DOCKERHUB_TOKEN) {
+            throw "Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets."
+          }
+          $env:DOCKERHUB_TOKEN | docker login --username $env:DOCKERHUB_USERNAME --password-stdin
+          if ($LASTEXITCODE -ne 0) { throw "Docker Hub login failed." }
+          $remoteImage = "$env:DOCKERHUB_USERNAME/crop-recommendation"
+          docker tag "$env:IMAGE_NAME`:$env:IMAGE_TAG" "$remoteImage`:$env:IMAGE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw "Docker image tagging failed." }
+          docker push "$remoteImage`:$env:IMAGE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw "Docker Hub push failed." }
+
+      - name: Deploy to Kubernetes
+        if: ${{ inputs.deploy_to_kubernetes }}
+        run: |
+          $context = kubectl config current-context
+          if ($LASTEXITCODE -ne 0 -or -not $context) {
+            throw "Configure a Kubernetes context on the self-hosted runner before deployment."
+          }
+          docker tag "$env:IMAGE_NAME`:$env:IMAGE_TAG" "$env:IMAGE_NAME`:1.0"
+          if ($LASTEXITCODE -ne 0) { throw "Could not tag the local Kubernetes image." }
+          kubectl apply -f k8s/deployment.yaml
+          if ($LASTEXITCODE -ne 0) { throw "Kubernetes deployment manifest failed." }
+          kubectl apply -f k8s/service.yaml
+          if ($LASTEXITCODE -ne 0) { throw "Kubernetes service manifest failed." }
+          kubectl rollout status deployment/crop-recommendation-api --timeout=180s
+          if ($LASTEXITCODE -ne 0) { throw "Kubernetes rollout failed." }
+
+      - name: Collect deployment diagnostics
+        if: ${{ failure() && inputs.deploy_to_kubernetes }}
+        run: |
+          kubectl get pods,services
+          kubectl describe deployment/crop-recommendation-api
+          kubectl logs deployment/crop-recommendation-api --all-containers=true
+
+      - name: Stop smoke-test container
+        if: always()
+        run: |
+          docker rm --force $env:CONTAINER_NAME 2>$null
+          exit 0
+
+      - name: Upload crop workflow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crop-lab13-${{ github.run_number }}
+          path: |
+            artifacts/**
+            reports/**
+            deployment/model_metadata.json
+          if-no-files-found: warn

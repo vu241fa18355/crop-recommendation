@@ -102,6 +102,7 @@ python .\deployment\deploy_production.py --build-only
 - `k8s/` — Kubernetes deployment and service manifests.
 - `tests/` — API and input-validation coverage.
 - `docs/` — architecture, workflow, CI, operations, and deployment guides.
+- [Labs 1–13 index](docs/LABS_1_TO_13.md) — numbered labs, entry points, and run instructions.
 
 ## Notes
 
@@ -109,3 +110,4 @@ python .\deployment\deploy_production.py --build-only
 - Run training again whenever the dataset or model configuration changes.
 - Local inference metadata is appended to `logs/crop_inference.jsonl`.
 - The existing lab-named scripts are retained as entry points, but the churn-specific dataset, models, and generated outputs have been removed.
+- Lab 8/9 use GitHub-hosted CI; Lab 13 includes a manual, opt-in self-hosted Windows end-to-end Docker/Kubernetes workflow.

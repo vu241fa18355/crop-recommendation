@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "test_rows": 440,
+  "models": {
+    "decision_tree": {
+      "accuracy": 0.9795454545454545,
+      "macro_f1": 0.9794231513743707
+    },
+    "random_forest": {
+      "accuracy": 0.9931818181818182,
+      "macro_f1": 0.9931775541531639
+    }
+  }
+}

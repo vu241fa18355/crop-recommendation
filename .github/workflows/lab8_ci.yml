@@ -1,4 +1,4 @@
-name: Crop Recommendation CI
+name: Lab 8 - Crop MLOps CI and Experiment Pipeline
 
 on:
   push:
@@ -20,3 +20,13 @@ jobs:
       - run: python src/mlops_pipeline/crop_recommendation_pipeline.py
       - run: python check_project.py
       - run: python -m pytest tests -q
+      - name: Upload experiment and lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crop-lab8-${{ github.run_number }}
+          path: |
+            artifacts/**
+            reports/**
+            models/registry.json
+          if-no-files-found: ignore

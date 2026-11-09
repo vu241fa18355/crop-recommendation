@@ -9,6 +9,7 @@ LOG_PATH = Path(__file__).resolve().parents[1] / "logs" / "crop_inference.jsonl"
 
 def log_inference(
     *,
+    features: dict[str, float],
     prediction: str,
     confidence: float,
     latency_ms: float,
@@ -17,6 +18,7 @@ def log_inference(
 ) -> None:
     event = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "features": features,
         "recommended_crop": prediction,
         "confidence": confidence,
         "latency_ms": latency_ms,

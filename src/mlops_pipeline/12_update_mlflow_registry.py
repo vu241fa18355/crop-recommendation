@@ -9,4 +9,4 @@ sys.path.insert(0, str(ROOT))
 from src.crop_workflow import main
 
 if __name__ == "__main__":
-    raise SystemExit(main("train"))
+    raise SystemExit(main("track"))
